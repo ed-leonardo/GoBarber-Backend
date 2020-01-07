@@ -22,11 +22,19 @@ class NotificationController {
   }
 
   async update(req, res) {
-    const notification = await Notification.findByIdAndUpdate(
-      req.params.id,
-      { read: true },
-      { new: true }
+    const notification = await Notification.findById(
+      req.params.id
     );
+
+    if (notification.user !== req.userId) {
+      return res
+        .status(401)
+        .json({ error: "You can't read notification of the others providers" })
+    }
+
+    notification.read = true;
+    notification.new = true;
+    await notification.save();
 
     return res.json(notification)
   }
